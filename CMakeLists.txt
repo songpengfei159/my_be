@@ -297,6 +297,13 @@ message(STATUS "Compiler Flags: ${CMAKE_CXX_FLAGS}")
 # Thrift requires these two definitions for some types that we use
 add_definitions(-DHAVE_INTTYPES_H -DHAVE_NETINET_IN_H)
 
+include_directories(
+        ${SRC_DIR}/
+        ${TEST_DIR}/
+        ${GENSRC_DIR}/
+        SYSTEM ${GPERFTOOLS_HOME}/include
+)
+
 set(WL_START_GROUP "-Wl,--start-group")
 set(WL_END_GROUP "-Wl,--end-group")
 set(WL_LINK_STATIC "-Wl,-Bstatic")
@@ -482,6 +489,7 @@ FUNCTION(ADD_BE_BENCH BENCH_NAME)
     ADD_TEST(${BENCH_FILE_NAME} "${BUILD_OUTPUT_ROOT_DIRECTORY}/${BENCH_NAME}")
 ENDFUNCTION()
 
+add_subdirectory(${SRC_DIR}/common)
 add_subdirectory(${SRC_DIR}/column)
 #add_subdirectory(${SRC_DIR}/gen_cpp)
 add_subdirectory(${SRC_DIR}/gutil)
