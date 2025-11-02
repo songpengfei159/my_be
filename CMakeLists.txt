@@ -496,6 +496,8 @@ add_subdirectory(${SRC_DIR}/gutil)
 add_subdirectory(${SRC_DIR}/storage)
 add_subdirectory(${SRC_DIR}/types)
 
+add_subdirectory(${SRC_DIR}/util)
+
 
 if (WITH_BENCH STREQUAL "ON")
     message(STATUS "Build binary with bench")

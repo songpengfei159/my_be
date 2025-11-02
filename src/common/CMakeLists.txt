@@ -18,7 +18,7 @@ add_library(Common STATIC
 #  daemon.cpp
 #  greplog.cpp
   status.cpp
-#  statusor.cpp
+  statusor.cpp
 #  logconfig.cpp
 #  configbase.cpp
 #  s3_uri.cpp
