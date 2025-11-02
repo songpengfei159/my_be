@@ -65,7 +65,7 @@ add_library(Storage STATIC
 #    tablet_schema_map.cpp
 #    tablet_updates.cpp
 #    txn_manager.cpp
-#    types.cpp
+    types.cpp
 #    update_manager.cpp
 #    utils.cpp
 #    compaction_utils.cpp

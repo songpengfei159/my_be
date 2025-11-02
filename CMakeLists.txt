@@ -494,6 +494,8 @@ add_subdirectory(${SRC_DIR}/column)
 #add_subdirectory(${SRC_DIR}/gen_cpp)
 add_subdirectory(${SRC_DIR}/gutil)
 add_subdirectory(${SRC_DIR}/storage)
+add_subdirectory(${SRC_DIR}/types)
+
 
 if (WITH_BENCH STREQUAL "ON")
     message(STATUS "Build binary with bench")
