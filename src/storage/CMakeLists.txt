@@ -23,7 +23,7 @@ add_library(Storage STATIC
 #    aggregate_type.cpp
 #    base_tablet.cpp
 #    decimal12.cpp
-#    decimal_type_info.cpp
+    decimal_type_info.cpp
 #    delete_handler.cpp
 #    del_vector.cpp
 #    delta_column_group.cpp
@@ -126,7 +126,7 @@ add_library(Storage STATIC
 #    task/engine_alter_tablet_task.cpp
 #    aggregate_iterator.cpp
 #    async_delta_writer.cpp
-#    chunk_helper.cpp
+    chunk_helper.cpp
 #    chunk_iterator.cpp
 #    column_predicate_cmp.cpp
 #    column_in_predicate.cpp
