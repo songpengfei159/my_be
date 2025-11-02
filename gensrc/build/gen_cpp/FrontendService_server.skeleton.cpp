@@ -55,6 +55,11 @@ class FrontendServiceHandler : virtual public FrontendServiceIf {
     printf("getTablePrivs\n");
   }
 
+  void getKeys(TGetKeysResponse& _return, const TGetKeysRequest& params) {
+    // Your implementation goes here
+    printf("getKeys\n");
+  }
+
   void getLoads(TGetLoadsResult& _return, const TGetLoadsParams& params) {
     // Your implementation goes here
     printf("getLoads\n");
@@ -245,6 +250,11 @@ class FrontendServiceHandler : virtual public FrontendServiceIf {
     printf("getWarehouses\n");
   }
 
+  void getQueryStatistics(TGetQueryStatisticsResponse& _return, const TGetQueryStatisticsRequest& request) {
+    // Your implementation goes here
+    printf("getQueryStatistics\n");
+  }
+
   void mvReport( ::starrocks::TMVReportEpochResponse& _return, const  ::starrocks::TMVMaintenanceTasks& request) {
     // Your implementation goes here
     printf("mvReport\n");
@@ -275,6 +285,16 @@ class FrontendServiceHandler : virtual public FrontendServiceIf {
     printf("listObjectDependencies\n");
   }
 
+  void listFeLocks(TFeLocksRes& _return, const TFeLocksReq& request) {
+    // Your implementation goes here
+    printf("listFeLocks\n");
+  }
+
+  void listFeMemoryUsage(TFeMemoryRes& _return, const TFeMemoryReq& request) {
+    // Your implementation goes here
+    printf("listFeMemoryUsage\n");
+  }
+
   void requireSlotAsync(TRequireSlotResponse& _return, const TRequireSlotRequest& request) {
     // Your implementation goes here
     printf("requireSlotAsync\n");
@@ -298,6 +318,31 @@ class FrontendServiceHandler : virtual public FrontendServiceIf {
   void getDictQueryParam(TGetDictQueryParamResponse& _return, const TGetDictQueryParamRequest& request) {
     // Your implementation goes here
     printf("getDictQueryParam\n");
+  }
+
+  void startTableReplication(TTableReplicationResponse& _return, const TTableReplicationRequest& request) {
+    // Your implementation goes here
+    printf("startTableReplication\n");
+  }
+
+  void getPartitionsMeta(TGetPartitionsMetaResponse& _return, const TGetPartitionsMetaRequest& request) {
+    // Your implementation goes here
+    printf("getPartitionsMeta\n");
+  }
+
+  void reportLakeCompaction(TReportLakeCompactionResponse& _return, const TReportLakeCompactionRequest& request) {
+    // Your implementation goes here
+    printf("reportLakeCompaction\n");
+  }
+
+  void listSessions(TListSessionsResponse& _return, const TListSessionsRequest& request) {
+    // Your implementation goes here
+    printf("listSessions\n");
+  }
+
+  void getTemporaryTablesInfo(TGetTemporaryTablesInfoResponse& _return, const TGetTemporaryTablesInfoRequest& request) {
+    // Your implementation goes here
+    printf("getTemporaryTablesInfo\n");
   }
 
 };

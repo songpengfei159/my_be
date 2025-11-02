@@ -40,7 +40,7 @@ BUILD_DIR = ${CURDIR}/../build/
 ifneq ("$(wildcard ${STARROCKS_THIRDPARTY}/installed/bin/protoc)","")
 	PROTOC = ${STARROCKS_THIRDPARTY}/installed/bin/protoc
 else
-	PROTOC = protoc
+	PROTOC = /usr/local/Cellar/protobuf/33.0/bin/protoc
 endif
 
 SOURCES = $(shell find ${CURDIR} -name "*.proto")

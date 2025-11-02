@@ -196,7 +196,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--cpp", dest='cpp_path', default=BE_PATH, help="Path of generated cpp file", type=str)
-    parser.add_argument("--java", dest='java_path', default=FE_PATH, help="Path of generated java file", type=str)
+    # parser.add_argument("--java", dest='java_path', default=FE_PATH, help="Path of generated java file", type=str)
     args = parser.parse_args()
 
     # Read the function metadata inputs
@@ -207,9 +207,9 @@ if __name__ == '__main__':
     if not os.path.exists(be_functions_dir):
         os.makedirs(be_functions_dir)
 
-    fe_functions_dir = args.java_path + "/com/starrocks/builtins"
-    if not os.path.exists(fe_functions_dir):
-        os.makedirs(fe_functions_dir)
-
-    generate_fe(fe_functions_dir + "/VectorizedBuiltinFunctions.java")
+    # fe_functions_dir = args.java_path + "/com/starrocks/builtins"
+    # if not os.path.exists(fe_functions_dir):
+    #     os.makedirs(fe_functions_dir)
+    #
+    # generate_fe(fe_functions_dir + "/VectorizedBuiltinFunctions.java")
     generate_cpp(be_functions_dir + "/builtin_functions.cpp")

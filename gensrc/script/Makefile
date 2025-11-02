@@ -25,18 +25,20 @@ all: gen_version gen_functions
 .PHONY: all
 
 # generated vectorized engine function
-GEN_FUNCTIONS_OUTPUT = ${FE_TARGET_DIR}/com/starrocks/builtins/VectorizedBuiltinFunctions.java  \
-                                  ${BUILD_DIR}/gen_cpp/opcode/builtin_functions.cpp
+#GEN_FUNCTIONS_OUTPUT = ${FE_TARGET_DIR}/com/starrocks/builtins/VectorizedBuiltinFunctions.java  \
+#                                  ${BUILD_DIR}/gen_cpp/opcode/builtin_functions.cpp
+
+GEN_FUNCTIONS_OUTPUT =  ${BUILD_DIR}/gen_cpp/opcode/builtin_functions.cpp
 
 ${GEN_FUNCTIONS_OUTPUT}: functions.py gen_functions.py 
-	${PYTHON} ${CURDIR}/gen_functions.py --cpp ${BUILD_DIR}/gen_cpp  --java ${FE_TARGET_DIR}
+	python3 ${CURDIR}/gen_functions.py --cpp ${BUILD_DIR}/gen_cpp
 
 gen_functions: ${GEN_FUNCTIONS_OUTPUT}
 .PHONY: gen_functions
 
 # generate version info
 gen_version:
-	${PYTHON} ${CURDIR}/../../build-support/gen_build_version.py --cpp ${BUILD_DIR}/gen_cpp --java ${FE_TARGET_DIR}
+	python3 ${CURDIR}/../../build-support/gen_build_version.py --cpp ${BUILD_DIR}/gen_cpp
 .PHONY: gen_version
 
 

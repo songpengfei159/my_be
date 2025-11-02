@@ -14,16 +14,16 @@
 // limitations under the License.
 
 // NOTE: This is a generated file, DO NOT EDIT IT
-// FINGERPRINT: d57260c661eb0bb29369eda93fe0289a
+// FINGERPRINT: ebb1412fd8bcd7b7d179e05af6714e8f
 
 namespace starrocks {
 
 const char* STARROCKS_VERSION = "UNKNOWN";
 const char* STARROCKS_COMMIT_HASH = "UNKNOWN";
-const char* STARROCKS_BUILD_TIME = "2025-11-02 18:02:29";
+const char* STARROCKS_BUILD_TIME = "2025-11-02 19:20:55";
 const char* STARROCKS_BUILD_USER = "spf";
 const char* STARROCKS_BUILD_HOST = "spf-mac.local (unknown)";
 const char* STARROCKS_BUILD_DISTRO_ID = "unknown";
-const char* STARROCKS_BUILD_ARCH = "arm64";
+const char* STARROCKS_BUILD_ARCH = "x86_64";
 }
 
