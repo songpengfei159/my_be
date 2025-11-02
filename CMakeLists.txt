@@ -495,6 +495,7 @@ add_subdirectory(${SRC_DIR}/column)
 add_subdirectory(${SRC_DIR}/gutil)
 add_subdirectory(${SRC_DIR}/storage)
 add_subdirectory(${SRC_DIR}/types)
+add_subdirectory(${SRC_DIR}/runtime)
 
 add_subdirectory(${SRC_DIR}/util)
 
