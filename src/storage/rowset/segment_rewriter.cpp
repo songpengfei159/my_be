@@ -13,7 +13,7 @@
 #include "storage/rowset/segment.h"
 #include "storage/rowset/segment_options.h"
 #include "storage/rowset/segment_writer.h"
-// #include "testutil/sync_point.h"
+#include "testutil/sync_point.h"
 #include "util/filesystem_util.h"
 #include "util/raw_container.h"
 #include "util/slice.h"
@@ -77,7 +77,7 @@ Status SegmentRewriter::rewrite_partial_update(const FileInfo& src, FileInfo* de
     uint64_t segment_file_size;
     RETURN_IF_ERROR(writer.append_chunk(*chunk));
     RETURN_IF_ERROR(writer.finalize_columns(&index_size));
-    // TEST_ERROR_POINT("SegmentRewriter::rewrite1");
+    TEST_ERROR_POINT("SegmentRewriter::rewrite1");
     RETURN_IF_ERROR(writer.finalize_footer(&segment_file_size));
 
     dest->size = segment_file_size;
@@ -170,7 +170,7 @@ Status SegmentRewriter::rewrite_auto_increment(const std::string& src_path, cons
     uint64_t segment_file_size;
     RETURN_IF_ERROR(writer.append_chunk(*chunk));
     RETURN_IF_ERROR(writer.finalize_columns(&index_size));
-    // TEST_ERROR_POINT("SegmentRewriter::rewrite2");
+    TEST_ERROR_POINT("SegmentRewriter::rewrite2");
     RETURN_IF_ERROR(writer.finalize_footer(&segment_file_size));
 
     return Status::OK();
@@ -271,7 +271,7 @@ Status SegmentRewriter::rewrite_auto_increment_lake(
     uint64_t segment_file_size;
     RETURN_IF_ERROR(writer.append_chunk(*chunk));
     RETURN_IF_ERROR(writer.finalize_columns(&index_size));
-    // TEST_ERROR_POINT("SegmentRewriter::rewrite3");
+    TEST_ERROR_POINT("SegmentRewriter::rewrite3");
     RETURN_IF_ERROR(writer.finalize_footer(&segment_file_size));
 
     dest->size = segment_file_size;
@@ -308,7 +308,7 @@ Status SegmentRewriter::rewrite(const std::string& src_path, const FileEncryptio
     uint64_t segment_file_size;
     RETURN_IF_ERROR(writer.append_chunk(*chunk));
     RETURN_IF_ERROR(writer.finalize_columns(&index_size));
-    // TEST_ERROR_POINT("SegmentRewriter::rewrite4");
+    TEST_ERROR_POINT("SegmentRewriter::rewrite4");
     RETURN_IF_ERROR(writer.finalize_footer(&segment_file_size));
 
     return Status::OK();
