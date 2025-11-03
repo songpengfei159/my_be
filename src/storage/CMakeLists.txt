@@ -38,7 +38,7 @@ add_library(Storage STATIC
     olap_common.cpp
     olap_define.cpp
 #    olap_server.cpp
-#    options.cpp
+    options.cpp
 #    page_cache.cpp
 #    persistent_index.cpp
 #    primary_index.cpp
@@ -53,7 +53,7 @@ add_library(Storage STATIC
 #    version_graph.cpp
 #    storage_engine.cpp
 #    data_dir.cpp
-#    short_key_index.cpp
+    short_key_index.cpp
 #    snapshot_manager.cpp
 #    snapshot_meta.cpp
 #    tablet.cpp
@@ -61,13 +61,13 @@ add_library(Storage STATIC
 #    tablet_meta.cpp
 #    tablet_meta_manager.cpp
 #    tablet_index.cpp
-#    tablet_schema.cpp
+    tablet_schema.cpp
 #    tablet_schema_map.cpp
 #    tablet_updates.cpp
 #    txn_manager.cpp
     types.cpp
 #    update_manager.cpp
-#    utils.cpp
+    utils.cpp
 #    compaction_utils.cpp
     rowset/array_column_iterator.cpp
     rowset/array_column_writer.cpp
@@ -145,9 +145,9 @@ add_library(Storage STATIC
 #    projection_iterator.cpp
 #    push_handler.cpp
 #    row_source_mask.cpp
-#    row_store_encoder.cpp
-#    row_store_encoder_simple.cpp
-#    row_store_encoder_factory.cpp
+    row_store_encoder.cpp
+    row_store_encoder_simple.cpp
+    row_store_encoder_factory.cpp
 #    schema_change.cpp
 #    schema_change_utils.cpp
 #    tablet_reader.cpp
@@ -156,7 +156,7 @@ add_library(Storage STATIC
 #    meta_reader.cpp
 #    lake_meta_reader.cpp
 #    olap_meta_reader.cpp
-#    seek_tuple.cpp
+    seek_tuple.cpp
 #    union_iterator.cpp
 #    unique_iterator.cpp
 #    column_aggregate_func.cpp
@@ -246,16 +246,16 @@ add_library(Storage STATIC
 #    rows_mapper.cpp
 #    primary_key_compaction_conflict_resolver.cpp
 #    local_primary_key_compaction_conflict_resolver.cpp
-#    inverted/index_descriptor.hpp
-#    inverted/inverted_index_iterator.cpp
-#    inverted/inverted_index_iterator.cpp
-#    inverted/inverted_index_option.cpp
-#    inverted/inverted_index_common.hpp
-#    inverted/inverted_plugin_factory.cpp
-#    inverted/clucene/clucene_plugin.cpp
-#    inverted/clucene/clucene_roaring_hit_collector.hpp
-#    inverted/clucene/clucene_inverted_writer.cpp
-#    inverted/clucene/clucene_inverted_reader.cpp
-#    inverted/clucene/clucene_inverted_util.hpp
-#    inverted/clucene/match_operator.cpp
+    inverted/index_descriptor.hpp
+    inverted/inverted_index_iterator.cpp
+    inverted/inverted_index_iterator.cpp
+    inverted/inverted_index_option.cpp
+    inverted/inverted_index_common.hpp
+    inverted/inverted_plugin_factory.cpp
+    inverted/clucene/clucene_plugin.cpp
+    inverted/clucene/clucene_roaring_hit_collector.hpp
+    inverted/clucene/clucene_inverted_writer.cpp
+    inverted/clucene/clucene_inverted_reader.cpp
+    inverted/clucene/clucene_inverted_util.hpp
+    inverted/clucene/match_operator.cpp
 )
