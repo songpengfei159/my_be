@@ -301,7 +301,12 @@ include_directories(
         ${SRC_DIR}/
         ${TEST_DIR}/
         ${GENSRC_DIR}/
+        SYSTEM ${THIRDPARTY_DIR}/include
         SYSTEM ${GPERFTOOLS_HOME}/include
+        SYSTEM ${JEMALLOC_HOME}/include
+        SYSTEM ${THIRDPARTY_DIR}/include/thrift/
+        SYSTEM ${THIRDPARTY_DIR}/include/event/
+        SYSTEM ${THIRDPARTY_DIR}/llvm/include/
 )
 
 set(WL_START_GROUP "-Wl,--start-group")
