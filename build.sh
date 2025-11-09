@@ -35,18 +35,12 @@ set -eo pipefail
 . ${STARROCKS_HOME}/env.sh
 
 
-if [[ $OSTYPE == darwin* ]] ; then
-    PARALLEL=$(sysctl -n hw.ncpu)
-    # 添加对 macOS 的支持
-    export CC=${STARROCKS_GCC_HOME}/bin/gcc
-    export CPP=${STARROCKS_GCC_HOME}/bin/cpp
-    export CXX=${STARROCKS_GCC_HOME}/bin/g++
-    export PATH=${STARROCKS_GCC_HOME}/bin:$PATH
-    # We know for sure that build-thirdparty.sh will fail on darwin platform, so just skip the step.
-else
-    if [[ ! -f ${STARROCKS_THIRDPARTY}/installed/llvm/lib/libLLVMInstCombine.a ]]; then
-        echo "Thirdparty libraries need to be build ..."
-        ${STARROCKS_THIRDPARTY}/build-thirdparty.sh
-    fi
-    PARALLEL=$[$(nproc)/4+1]
+if [[ ! -f ${STARROCKS_THIRDPARTY}/installed/llvm/lib/libLLVMInstCombine.a ]]; then
+    echo "Thirdparty libraries need to be build ..."
+    ${STARROCKS_THIRDPARTY}/build-thirdparty.sh
 fi
+
+#PARALLEL=$(sysctl -n hw.ncpu)
+
+PARALLEL=$[$(nproc)/4+1]
+

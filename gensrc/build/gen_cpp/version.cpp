@@ -20,7 +20,7 @@ namespace starrocks {
 
 const char* STARROCKS_VERSION = "UNKNOWN";
 const char* STARROCKS_COMMIT_HASH = "UNKNOWN";
-const char* STARROCKS_BUILD_TIME = "2025-11-02 19:20:55";
+const char* STARROCKS_BUILD_TIME = "2025-11-09 15:24:14";
 const char* STARROCKS_BUILD_USER = "spf";
 const char* STARROCKS_BUILD_HOST = "spf-mac.local (unknown)";
 const char* STARROCKS_BUILD_DISTRO_ID = "unknown";

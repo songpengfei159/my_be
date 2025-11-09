@@ -498,6 +498,7 @@ add_subdirectory(${SRC_DIR}/gutil)
 add_subdirectory(${SRC_DIR}/storage)
 add_subdirectory(${SRC_DIR}/types)
 add_subdirectory(${SRC_DIR}/runtime)
+add_subdirectory(${SRC_DIR}/run_instance)
 
 add_subdirectory(${SRC_DIR}/util)
 
