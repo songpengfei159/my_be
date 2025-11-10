@@ -8,6 +8,11 @@ curdir=`cd "$curdir"; pwd`
 export STARROCKS_HOME=${STARROCKS_HOME:-$curdir/..}
 export TP_DIR=$curdir
 
+# include custom environment variables
+if [[ -f ${STARROCKS_HOME}/env.sh ]]; then
+    . ${STARROCKS_HOME}/env.sh
+fi
+
 if [[ ! -f ${TP_DIR}/download-thirdparty.sh ]]; then
     echo "Download thirdparty script is missing".
     exit 1
@@ -24,6 +29,18 @@ cd $TP_DIR
 # Download thirdparties.
 ${TP_DIR}/download-thirdparty.sh
 
+# set COMPILER
+if [[ ! -z ${STARROCKS_GCC_HOME} ]]; then
+    export CC=${STARROCKS_GCC_HOME}/bin/gcc
+    export CPP=${STARROCKS_GCC_HOME}/bin/cpp
+    export CXX=${STARROCKS_GCC_HOME}/bin/g++
+    export PATH=${STARROCKS_GCC_HOME}/bin:$PATH
+else
+    echo "STARROCKS_GCC_HOME environment variable is not set"
+    exit 1
+fi
+
+# prepare installed prefix
 mkdir -p ${TP_DIR}/installed
 
 check_prerequest() {
@@ -36,18 +53,6 @@ check_prerequest() {
         echo $NAME is found
     fi
 }
-
-
-# set COMPILER
-if [[ ! -z ${STARROCKS_GCC_HOME} ]]; then
-    export CC=${STARROCKS_GCC_HOME}/bin/gcc
-    export CPP=${STARROCKS_GCC_HOME}/bin/cpp
-    export CXX=${STARROCKS_GCC_HOME}/bin/g++
-    export PATH=${STARROCKS_GCC_HOME}/bin:$PATH
-else
-    echo "STARROCKS_GCC_HOME environment variable is not set"
-    exit 1
-fi
 
 # sudo apt-get install cmake
 # sudo yum install cmake
@@ -67,9 +72,25 @@ check_prerequest "automake --version" "automake"
 
 # sudo apt-get install libtool
 # sudo yum install libtool
-#check_prerequest "libtoolize --version" "libtool"
+check_prerequest "libtoolize --version" "libtool"
 
 BUILD_SYSTEM=${BUILD_SYSTEM:-make}
+
+# sudo apt-get install binutils-dev
+# sudo yum install binutils-devel
+#check_prerequest "locate libbfd.a" "binutils-dev"
+
+# sudo apt-get install libiberty-dev
+# no need in centos 7.1
+#check_prerequest "locate libiberty.a" "libiberty-dev"
+
+# sudo apt-get install bison
+# sudo yum install bison
+#check_prerequest "bison --version" "bison"
+
+#########################
+# build all thirdparties
+#########################
 
 
 # Name of cmake build directory in each thirdpary project.
@@ -508,7 +529,6 @@ build_brpc() {
     cd $TP_SOURCE_DIR/$BRPC_SOURCE
     CMAKE_GENERATOR="Unix Makefiles"
     BUILD_SYSTEM='make'
-    echo "Build brpc with TP_INSTALL_DIR: ${TP_INSTALL_DIR}"
     PATH=$PATH:$TP_INSTALL_DIR/bin/ ./config_brpc.sh --headers="$TP_INSTALL_DIR/include" --libs="$TP_INSTALL_DIR/bin $TP_INSTALL_DIR/lib" --with-glog --with-thrift
     make -j$PARALLEL
     cp -rf output/* ${TP_INSTALL_DIR}/
@@ -1226,6 +1246,7 @@ strip_binary() {
     echo "Strip binaries in $TP_INSTALL_DIR/bin/ ..."
     strip $TP_INSTALL_DIR/bin/* 2>/dev/null || true
 }
+
 
 # strip `$TP_SOURCE_DIR` and `$TP_INSTALL_DIR` from source code file path
 export FILE_PREFIX_MAP_OPTION="-ffile-prefix-map=${TP_SOURCE_DIR}=. -ffile-prefix-map=${TP_INSTALL_DIR}=."
