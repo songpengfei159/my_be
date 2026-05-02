@@ -1296,7 +1296,7 @@ build_protobuf
 #build_s2
 #build_bitshuffle
 #build_croaringbitmap
-#build_cctz
+build_cctz
 build_fmt
 #build_ryu
 #build_hadoop

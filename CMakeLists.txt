@@ -372,6 +372,76 @@ set(STARROCKS_DEPENDENCIES ${STARROCKS_DEPENDENCIES}
         jvm
 )
 
+# Set thirdparty libraries
+set(STARROCKS_DEPENDENCIES
+        ${STARROCKS_DEPENDENCIES}
+        ${WL_START_GROUP}
+#        clucene-core
+#        clucene-shared
+#        clucene-contribs-lib
+#        build_version
+#        rocksdb
+#        libs2
+#        snappy
+#        ${Boost_LIBRARIES}
+#        thrift
+#        thriftnb
+#        glog
+#        re2
+#        pprof
+#        # Put lz4 in front of librdkafka to make sure that segment use the native lz4 library to compress/decompress page
+#        # Otherwise, he will use the lz4 Library in librdkafka
+#        lz4
+#        libevent
+#        curl
+#        ${LIBZ}
+#        ${LIBBZ2}
+#        gflags
+#        brpc
+        protobuf
+#        openssl
+#        crypto
+#        leveldb
+#        bitshuffle
+#        roaring
+#        brotlicommon
+#        brotlidec
+#        brotlienc
+#        zstd
+#        streamvbyte
+#        arrow
+#        jemalloc # required by arrow
+#        parquet
+#        orc
+#        cctz
+#        fmt
+#        ryu
+#        hyperscan
+#        simdjson
+#        simdutf
+#        sasl
+#        gssapi_krb5
+#        krb5
+#        krb5support
+#        k5crypto
+#        com_err
+#        librdkafka_cpp
+#        librdkafka
+#        libpulsar
+#        velocypack
+#        opentelemetry_trace
+#        http_client_curl
+#        opentelemetry_resources
+#        opentelemetry_common
+#        opentelemetry_exporter_jaeger_trace
+#        jansson
+#        avro
+#        serdes
+#        fiu
+#        ${LLVM_LIBRARIES}
+#        ${WL_END_GROUP}
+)
+
 if (${WITH_CACHELIB} STREQUAL "ON")
     set(STARROCKS_DEPENDENCIES
             ${STARROCKS_DEPENDENCIES}
