@@ -126,7 +126,7 @@ else()
     set(LIBZ -lz)
     set(LIBEVENT event)
 endif()
-#
+# 在这儿进行打印
 set(BUILD_VERSION_CC ${CMAKE_BINARY_DIR}/build_version.cc)
 configure_file(${SRC_DIR}/common/build_version.cc.in ${BUILD_VERSION_CC} @ONLY)
 add_library(build_version OBJECT ${BUILD_VERSION_CC})

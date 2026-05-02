@@ -15,14 +15,14 @@
 set(LIBRARY_OUTPUT_PATH "${BUILD_DIR}/src/common")
 
 add_library(Common STATIC
-#  daemon.cpp
-#  greplog.cpp
+  daemon.cpp
+  greplog.cpp
   status.cpp
   statusor.cpp
-#  logconfig.cpp
-#  configbase.cpp
-#  s3_uri.cpp
-#  tracer.cpp
+  logconfig.cpp
+  configbase.cpp
+  s3_uri.cpp
+  tracer.cpp
   prof/heap_prof.cpp
 )
 
