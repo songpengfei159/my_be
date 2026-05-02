@@ -1268,7 +1268,7 @@ export CFLAGS=$GLOBAL_CFLAGS
 #build_bzip
 #build_openssl
 #build_boost # must before thrift
-#build_protobuf
+build_protobuf
 #build_gflags
 #build_gtest
 #build_glog
@@ -1297,7 +1297,7 @@ export CFLAGS=$GLOBAL_CFLAGS
 #build_bitshuffle
 #build_croaringbitmap
 #build_cctz
-#build_fmt
+build_fmt
 #build_ryu
 #build_hadoop
 #build_jdk
