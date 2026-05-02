@@ -281,3 +281,260 @@ fi
 # DO NOT using parallel make(-j) for gensrc
 make
 cd ${STARROCKS_HOME}
+
+if [[ "${MACHINE_TYPE}" == "aarch64" ]]; then
+    export LIBRARY_PATH=${JAVA_HOME}/jre/lib/aarch64/server/
+else
+    export LIBRARY_PATH=${JAVA_HOME}/jre/lib/amd64/server/
+fi
+
+# Clean and build Backend
+if [ ${BUILD_BE} -eq 1 ] ; then
+    if ! ${CMAKE_CMD} --version; then
+        echo "Error: cmake is not found"
+        exit 1
+    fi
+
+    CMAKE_BUILD_TYPE=$BUILD_TYPE
+    echo "Build Backend: ${CMAKE_BUILD_TYPE}"
+    CMAKE_BUILD_DIR=${STARROCKS_HOME}/be/build_${CMAKE_BUILD_TYPE}
+    if [ "${WITH_GCOV}" = "ON" ]; then
+        CMAKE_BUILD_DIR=${STARROCKS_HOME}/be/build_${CMAKE_BUILD_TYPE}_gcov
+    fi
+
+    if [ ${CLEAN} -eq 1 ]; then
+        rm -rf $CMAKE_BUILD_DIR
+        rm -rf ${STARROCKS_HOME}/be/output/
+    fi
+    mkdir -p ${CMAKE_BUILD_DIR}
+
+    source ${STARROCKS_HOME}/bin/common.sh
+
+    cd ${CMAKE_BUILD_DIR}
+    if [ "${USE_STAROS}" == "ON"  ]; then
+      if [ -z "$STARLET_INSTALL_DIR" ] ; then
+        # assume starlet_thirdparty is installed to ${STARROCKS_THIRDPARTY}/installed/starlet/
+        STARLET_INSTALL_DIR=${STARROCKS_THIRDPARTY}/installed/starlet
+      fi
+      export STARLET_INSTALL_DIR
+    fi
+
+    if [ "${OUTPUT_COMPILE_TIME}" == "ON" ]; then
+        rm -f ${ROOT}/compile_times.txt
+        CXX_COMPILER_LAUNCHER=${ROOT}/build-support/compile_time.sh
+    else
+        CXX_COMPILER_LAUNCHER=${CCACHE}
+    fi
+    if [ "${WITH_CLANG_TIDY}" == "ON" ];then
+        # this option cannot work with clang-14
+        WITH_COMPRESS=OFF
+    fi
+
+
+    ${CMAKE_CMD} -G "${CMAKE_GENERATOR}"                                \
+                  -DSTARROCKS_THIRDPARTY=${STARROCKS_THIRDPARTY}        \
+                  -DSTARROCKS_HOME=${STARROCKS_HOME}                    \
+                  -DSTARLET_INSTALL_DIR=${STARLET_INSTALL_DIR}          \
+                  -DCMAKE_CXX_COMPILER_LAUNCHER=${CXX_COMPILER_LAUNCHER} \
+                  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}                \
+                  -DMAKE_TEST=OFF -DWITH_GCOV=${WITH_GCOV}              \
+                  -DUSE_AVX2=$USE_AVX2 -DUSE_AVX512=$USE_AVX512 -DUSE_SSE4_2=$USE_SSE4_2 \
+                  -DJEMALLOC_DEBUG=$JEMALLOC_DEBUG                      \
+                  -DENABLE_QUERY_DEBUG_TRACE=$ENABLE_QUERY_DEBUG_TRACE  \
+                  -DWITH_BENCH=${WITH_BENCH}                            \
+                  -DWITH_CLANG_TIDY=${WITH_CLANG_TIDY}                  \
+                  -DWITH_COMPRESS=${WITH_COMPRESS}                      \
+                  -DWITH_STARCACHE=${WITH_STARCACHE}                    \
+                  -DUSE_STAROS=${USE_STAROS}                            \
+                  -DENABLE_FAULT_INJECTION=${ENABLE_FAULT_INJECTION}    \
+                  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON  ..
+
+    time ${BUILD_SYSTEM} -j${PARALLEL}
+    if [ "${WITH_CLANG_TIDY}" == "ON" ];then
+        exit 0
+    fi
+
+    ${BUILD_SYSTEM} install
+
+    # Build Java Extensions
+    if [ ${BUILD_JAVA_EXT} = "ON" ]; then
+        echo "Build Java Extensions"
+        cd ${STARROCKS_HOME}/java-extensions
+        if [ ${CLEAN} -eq 1 ]; then
+            ${MVN_CMD} clean
+        fi
+        ${MVN_CMD} package -DskipTests
+        cd ${STARROCKS_HOME}
+    else
+        echo "Skip Building Java Extensions"
+    fi
+fi
+
+cd ${STARROCKS_HOME}
+
+
+# Assesmble FE modules
+FE_MODULES=
+if [ ${BUILD_FE} -eq 1 ] || [ ${BUILD_SPARK_DPP} -eq 1 ] || [ ${BUILD_HIVE_UDF} -eq 1 ]; then
+    if [ ${BUILD_SPARK_DPP} -eq 1 ]; then
+        FE_MODULES="fe-common,spark-dpp"
+    fi
+    if [ ${BUILD_HIVE_UDF} -eq 1 ]; then
+        FE_MODULES="fe-common,hive-udf"
+    fi
+    if [ ${BUILD_FE} -eq 1 ]; then
+        FE_MODULES="hive-udf,fe-common,spark-dpp,fe-core"
+    fi
+fi
+
+# Clean and build Frontend
+if [ ${FE_MODULES}x != ""x ]; then
+    echo "Build Frontend Modules: $FE_MODULES"
+    cd ${STARROCKS_HOME}/fe
+    if [ ${CLEAN} -eq 1 ]; then
+        ${MVN_CMD} clean
+    fi
+    ${MVN_CMD} package -am -pl ${FE_MODULES} -DskipTests
+    cd ${STARROCKS_HOME}/java-extensions
+    ${MVN_CMD} package -am -pl hadoop-ext -DskipTests
+    cd ${STARROCKS_HOME}
+fi
+
+
+# Clean and prepare output dir
+STARROCKS_OUTPUT=${STARROCKS_HOME}/output/
+mkdir -p ${STARROCKS_OUTPUT}
+
+# Copy Frontend and Backend
+if [ ${BUILD_FE} -eq 1 -o ${BUILD_SPARK_DPP} -eq 1 ]; then
+    if [ ${BUILD_FE} -eq 1 ]; then
+        install -d ${STARROCKS_OUTPUT}/fe/bin ${STARROCKS_OUTPUT}/fe/conf/ \
+                   ${STARROCKS_OUTPUT}/fe/webroot/ ${STARROCKS_OUTPUT}/fe/lib/ \
+                   ${STARROCKS_OUTPUT}/fe/spark-dpp/ ${STARROCKS_OUTPUT}/fe/hive-udf
+
+        cp -r -p ${STARROCKS_HOME}/bin/*_fe.sh ${STARROCKS_OUTPUT}/fe/bin/
+        cp -r -p ${STARROCKS_HOME}/bin/show_fe_version.sh ${STARROCKS_OUTPUT}/fe/bin/
+        cp -r -p ${STARROCKS_HOME}/bin/common.sh ${STARROCKS_OUTPUT}/fe/bin/
+        cp -r -p ${STARROCKS_HOME}/conf/fe.conf ${STARROCKS_OUTPUT}/fe/conf/
+        cp -r -p ${STARROCKS_HOME}/conf/udf_security.policy ${STARROCKS_OUTPUT}/fe/conf/
+        cp -r -p ${STARROCKS_HOME}/conf/hadoop_env.sh ${STARROCKS_OUTPUT}/fe/conf/
+        cp -r -p ${STARROCKS_HOME}/conf/core-site.xml ${STARROCKS_OUTPUT}/fe/conf/
+
+        rm -rf ${STARROCKS_OUTPUT}/fe/lib/*
+        cp -r -p ${STARROCKS_HOME}/fe/fe-core/target/lib/* ${STARROCKS_OUTPUT}/fe/lib/
+        cp -r -p ${STARROCKS_HOME}/fe/fe-core/target/starrocks-fe.jar ${STARROCKS_OUTPUT}/fe/lib/
+        cp -r -p ${STARROCKS_HOME}/java-extensions/hadoop-ext/target/starrocks-hadoop-ext.jar ${STARROCKS_OUTPUT}/fe/lib/
+        cp -r -p ${STARROCKS_HOME}/webroot/* ${STARROCKS_OUTPUT}/fe/webroot/
+        cp -r -p ${STARROCKS_HOME}/fe/spark-dpp/target/spark-dpp-*-jar-with-dependencies.jar ${STARROCKS_OUTPUT}/fe/spark-dpp/
+        cp -r -p ${STARROCKS_HOME}/fe/hive-udf/target/hive-udf-1.0.0.jar ${STARROCKS_OUTPUT}/fe/hive-udf/
+        cp -r -p ${STARROCKS_THIRDPARTY}/installed/async-profiler/* ${STARROCKS_OUTPUT}/fe/bin/
+        MSG="${MSG} √ ${MSG_FE}"
+    elif [ ${BUILD_SPARK_DPP} -eq 1 ]; then
+        install -d ${STARROCKS_OUTPUT}/fe/spark-dpp/
+        rm -rf ${STARROCKS_OUTPUT}/fe/spark-dpp/*
+        cp -r -p ${STARROCKS_HOME}/fe/spark-dpp/target/spark-dpp-*-jar-with-dependencies.jar ${STARROCKS_OUTPUT}/fe/spark-dpp/
+        cp -r -p ${STARROCKS_HOME}/fe/hive-udf/target/hive-udf-1.0.0.jar ${STARROCKS_HOME}/fe/hive-udf/
+        MSG="${MSG} √ ${MSG_DPP}"
+    fi
+fi
+
+if [ ${BUILD_BE} -eq 1 ]; then
+    rm -rf ${STARROCKS_OUTPUT}/be/lib/*
+    mkdir -p ${STARROCKS_OUTPUT}/be/lib/jni-packages
+
+    install -d ${STARROCKS_OUTPUT}/be/bin  \
+               ${STARROCKS_OUTPUT}/be/conf \
+               ${STARROCKS_OUTPUT}/be/lib/hadoop \
+               ${STARROCKS_OUTPUT}/be/www  \
+
+    cp -r -p ${STARROCKS_HOME}/be/output/bin/* ${STARROCKS_OUTPUT}/be/bin/
+    cp -r -p ${STARROCKS_HOME}/be/output/conf/be.conf ${STARROCKS_OUTPUT}/be/conf/
+    cp -r -p ${STARROCKS_HOME}/be/output/conf/udf_security.policy ${STARROCKS_OUTPUT}/be/conf/
+    cp -r -p ${STARROCKS_HOME}/be/output/conf/be_test.conf ${STARROCKS_OUTPUT}/be/conf/
+    cp -r -p ${STARROCKS_HOME}/be/output/conf/cn.conf ${STARROCKS_OUTPUT}/be/conf/
+    cp -r -p ${STARROCKS_HOME}/be/output/conf/hadoop_env.sh ${STARROCKS_OUTPUT}/be/conf/
+    cp -r -p ${STARROCKS_HOME}/be/output/conf/log4j2.properties ${STARROCKS_OUTPUT}/be/conf/
+    cp -r -p ${STARROCKS_HOME}/be/output/conf/core-site.xml ${STARROCKS_OUTPUT}/be/conf/
+
+    if [ "${BUILD_TYPE}" == "ASAN" ]; then
+        cp -r -p ${STARROCKS_HOME}/be/output/conf/asan_suppressions.conf ${STARROCKS_OUTPUT}/be/conf/
+    fi
+    cp -r -p ${STARROCKS_HOME}/be/output/lib/starrocks_be ${STARROCKS_OUTPUT}/be/lib/
+    cp -r -p ${STARROCKS_HOME}/be/output/lib/libmockjvm.so ${STARROCKS_OUTPUT}/be/lib/libjvm.so
+    cp -r -p ${STARROCKS_THIRDPARTY}/installed/jemalloc/bin/jeprof ${STARROCKS_OUTPUT}/be/bin
+    # format $BUILD_TYPE to lower case
+    ibuildtype=`echo ${BUILD_TYPE} | tr 'A-Z' 'a-z'`
+    if [ "${ibuildtype}" == "release" ] ; then
+        pushd ${STARROCKS_OUTPUT}/be/lib/ &>/dev/null
+        BE_BIN=starrocks_be
+        BE_BIN_DEBUGINFO=starrocks_be.debuginfo
+        echo "Split $BE_BIN debug symbol to $BE_BIN_DEBUGINFO ..."
+        # strip be binary
+        # if eu-strip is available, can replace following three lines into `eu-strip -g -f starrocks_be.debuginfo starrocks_be`
+        objcopy --only-keep-debug $BE_BIN $BE_BIN_DEBUGINFO
+        strip --strip-debug $BE_BIN
+        objcopy --add-gnu-debuglink=$BE_BIN_DEBUGINFO $BE_BIN
+        popd &>/dev/null
+    fi
+    cp -r -p ${STARROCKS_HOME}/be/output/www/* ${STARROCKS_OUTPUT}/be/www/
+
+    if [ "${BUILD_JAVA_EXT}" == "ON" ]; then
+        cp -r -p ${STARROCKS_HOME}/java-extensions/jdbc-bridge/target/starrocks-jdbc-bridge-jar-with-dependencies.jar ${STARROCKS_OUTPUT}/be/lib/jni-packages
+        cp -r -p ${STARROCKS_HOME}/java-extensions/udf-extensions/target/udf-extensions-jar-with-dependencies.jar ${STARROCKS_OUTPUT}/be/lib/jni-packages
+        cp -r -p ${STARROCKS_HOME}/java-extensions/java-utils/target/starrocks-java-utils.jar ${STARROCKS_OUTPUT}/be/lib/jni-packages
+        cp -r -p ${STARROCKS_HOME}/java-extensions/jni-connector/target/starrocks-jni-connector.jar ${STARROCKS_OUTPUT}/be/lib/jni-packages
+        cp -r -p ${STARROCKS_HOME}/java-extensions/hudi-reader/target/hudi-reader-lib ${STARROCKS_OUTPUT}/be/lib/
+        cp -r -p ${STARROCKS_HOME}/java-extensions/hudi-reader/target/starrocks-hudi-reader.jar ${STARROCKS_OUTPUT}/be/lib/jni-packages
+        cp -r -p ${STARROCKS_HOME}/java-extensions/hudi-reader/target/starrocks-hudi-reader.jar ${STARROCKS_OUTPUT}/be/lib/hudi-reader-lib
+        cp -r -p ${STARROCKS_HOME}/java-extensions/odps-reader/target/odps-reader-lib ${STARROCKS_OUTPUT}/be/lib/
+        cp -r -p ${STARROCKS_HOME}/java-extensions/odps-reader/target/starrocks-odps-reader.jar ${STARROCKS_OUTPUT}/be/lib/jni-packages
+        cp -r -p ${STARROCKS_HOME}/java-extensions/odps-reader/target/starrocks-odps-reader.jar ${STARROCKS_OUTPUT}/be/lib/odps-reader-lib
+        cp -r -p ${STARROCKS_HOME}/java-extensions/iceberg-metadata-reader/target/iceberg-reader-lib ${STARROCKS_OUTPUT}/be/lib/
+        cp -r -p ${STARROCKS_HOME}/java-extensions/iceberg-metadata-reader/target/starrocks-iceberg-metadata-reader.jar ${STARROCKS_OUTPUT}/be/lib/jni-packages
+        cp -r -p ${STARROCKS_HOME}/java-extensions/iceberg-metadata-reader/target/starrocks-iceberg-metadata-reader.jar ${STARROCKS_OUTPUT}/be/lib/iceberg-reader-lib
+        cp -r -p ${STARROCKS_HOME}/java-extensions/common-runtime/target/common-runtime-lib ${STARROCKS_OUTPUT}/be/lib/
+        cp -r -p ${STARROCKS_HOME}/java-extensions/paimon-reader/target/paimon-reader-lib ${STARROCKS_OUTPUT}/be/lib/
+        cp -r -p ${STARROCKS_HOME}/java-extensions/paimon-reader/target/starrocks-paimon-reader.jar ${STARROCKS_OUTPUT}/be/lib/jni-packages
+        cp -r -p ${STARROCKS_HOME}/java-extensions/paimon-reader/target/starrocks-paimon-reader.jar ${STARROCKS_OUTPUT}/be/lib/paimon-reader-lib
+        cp -r -p ${STARROCKS_HOME}/java-extensions/kudu-reader/target/kudu-reader-lib ${STARROCKS_OUTPUT}/be/lib/
+        cp -r -p ${STARROCKS_HOME}/java-extensions/kudu-reader/target/starrocks-kudu-reader.jar ${STARROCKS_OUTPUT}/be/lib/jni-packages
+        cp -r -p ${STARROCKS_HOME}/java-extensions/kudu-reader/target/starrocks-kudu-reader.jar ${STARROCKS_OUTPUT}/be/lib/kudu-reader-lib
+        cp -r -p ${STARROCKS_HOME}/java-extensions/hadoop-ext/target/starrocks-hadoop-ext.jar ${STARROCKS_OUTPUT}/be/lib/jni-packages
+        cp -r -p ${STARROCKS_HOME}/java-extensions/hive-reader/target/hive-reader-lib ${STARROCKS_OUTPUT}/be/lib/
+        cp -r -p ${STARROCKS_HOME}/java-extensions/hive-reader/target/starrocks-hive-reader.jar ${STARROCKS_OUTPUT}/be/lib/jni-packages
+        cp -r -p ${STARROCKS_HOME}/java-extensions/hive-reader/target/starrocks-hive-reader.jar ${STARROCKS_OUTPUT}/be/lib/hive-reader-lib
+    fi
+
+    cp -r -p ${STARROCKS_THIRDPARTY}/installed/hadoop/share/hadoop/common ${STARROCKS_OUTPUT}/be/lib/hadoop/
+    cp -r -p ${STARROCKS_THIRDPARTY}/installed/hadoop/share/hadoop/hdfs ${STARROCKS_OUTPUT}/be/lib/hadoop/
+    cp -p ${STARROCKS_THIRDPARTY}/installed/hadoop/share/hadoop/tools/lib/hadoop-azure-* ${STARROCKS_OUTPUT}/be/lib/hadoop/hdfs
+    cp -p ${STARROCKS_THIRDPARTY}/installed/hadoop/share/hadoop/tools/lib/azure-* ${STARROCKS_OUTPUT}/be/lib/hadoop/hdfs
+    cp -p ${STARROCKS_THIRDPARTY}/installed/gcs_connector/*.jar ${STARROCKS_OUTPUT}/be/lib/hadoop/hdfs
+    cp -r -p ${STARROCKS_THIRDPARTY}/installed/hadoop/lib/native ${STARROCKS_OUTPUT}/be/lib/hadoop/
+
+    # remove zookeeper
+    rm -f ${STARROCKS_OUTPUT}/be/lib/hadoop/common/lib/zookeeper-3.8.3.jar
+    rm -f ${STARROCKS_OUTPUT}/be/lib/hadoop/hdfs/lib/zookeeper-3.8.3.jar
+    rm -f ${STARROCKS_OUTPUT}/be/lib/hadoop/common/lib/avro-1.9.2.jar
+    rm -f ${STARROCKS_OUTPUT}/be/lib/hadoop/hdfs/lib/avro-1.9.2.jar
+
+    MSG="${MSG} √ ${MSG_BE}"
+fi
+
+
+
+cp -r -p "${STARROCKS_HOME}/LICENSE.txt" "${STARROCKS_OUTPUT}/LICENSE.txt"
+build-support/gen_notice.py "${STARROCKS_HOME}/licenses,${STARROCKS_HOME}/licenses-binary" "${STARROCKS_OUTPUT}/NOTICE.txt" all
+
+endTime=$(date +%s)
+totalTime=$((endTime - startTime))
+
+echo "***************************************"
+echo "Successfully build StarRocks ${MSG} ; StartTime:$(date -d @$startTime '+%Y-%m-%d %H:%M:%S'), EndTime:$(date -d @$endTime '+%Y-%m-%d %H:%M:%S'), TotalTime:${totalTime}s"
+echo "***************************************"
+
+if [[ ! -z ${STARROCKS_POST_BUILD_HOOK} ]]; then
+    eval ${STARROCKS_POST_BUILD_HOOK}
+fi
+
+exit 0
