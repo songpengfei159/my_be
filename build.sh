@@ -297,14 +297,14 @@ if [ ${BUILD_BE} -eq 1 ] ; then
 
     CMAKE_BUILD_TYPE=$BUILD_TYPE
     echo "Build Backend: ${CMAKE_BUILD_TYPE}"
-    CMAKE_BUILD_DIR=${STARROCKS_HOME}/be/build_${CMAKE_BUILD_TYPE}
+    CMAKE_BUILD_DIR=${STARROCKS_HOME}/build_${CMAKE_BUILD_TYPE}
     if [ "${WITH_GCOV}" = "ON" ]; then
-        CMAKE_BUILD_DIR=${STARROCKS_HOME}/be/build_${CMAKE_BUILD_TYPE}_gcov
+        CMAKE_BUILD_DIR=${STARROCKS_HOME}/build_${CMAKE_BUILD_TYPE}_gcov
     fi
 
     if [ ${CLEAN} -eq 1 ]; then
         rm -rf $CMAKE_BUILD_DIR
-        rm -rf ${STARROCKS_HOME}/be/output/
+        rm -rf ${STARROCKS_HOME}/output/
     fi
     mkdir -p ${CMAKE_BUILD_DIR}
 
