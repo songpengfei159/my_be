@@ -329,7 +329,8 @@ if [ ${BUILD_BE} -eq 1 ] ; then
         # this option cannot work with clang-14
         WITH_COMPRESS=OFF
     fi
-
+    # 打印 标志着开始构建
+    echo "Build Backend ==========="
 
     ${CMAKE_CMD} -G "${CMAKE_GENERATOR}"                                \
                   -DSTARROCKS_THIRDPARTY=${STARROCKS_THIRDPARTY}        \
