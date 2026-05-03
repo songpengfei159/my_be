@@ -1302,7 +1302,7 @@ build_fmt
 #build_hadoop
 #build_jdk
 #build_ragel
-#build_hyperscan
+build_hyperscan
 #build_mariadb
 #build_aliyun_jindosdk
 #build_gcs_connector
