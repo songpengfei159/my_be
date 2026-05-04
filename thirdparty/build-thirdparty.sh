@@ -1299,7 +1299,7 @@ build_protobuf
 build_cctz
 build_fmt
 build_ryu
-build_hadoop
+#build_hadoop
 build_jdk
 build_ragel
 build_hyperscan
