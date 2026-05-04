@@ -1298,10 +1298,10 @@ build_protobuf
 #build_croaringbitmap
 build_cctz
 build_fmt
-#build_ryu
-#build_hadoop
-#build_jdk
-#build_ragel
+build_ryu
+build_hadoop
+build_jdk
+build_ragel
 build_hyperscan
 #build_mariadb
 #build_aliyun_jindosdk
